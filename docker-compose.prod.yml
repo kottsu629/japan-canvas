@@ -1,0 +1,4 @@
+services:
+  db:
+    # Do not expose MySQL to host network in production.
+    ports: !reset []
