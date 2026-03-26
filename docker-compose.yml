@@ -23,20 +23,25 @@ services:
       - db_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  app:
-    build: .
+  backend:
+    build: ./backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       DB_HOST: ${DB_HOST:-db}
       DB_PORT: ${DB_PORT:-3306}
       DB_USER: ${MYSQL_USER:-app_user}
       DB_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
       DB_NAME: ${MYSQL_DATABASE:-japan_canvas}
-
 volumes:
   db_data:
