@@ -6,7 +6,7 @@ RUN apk add --no-cache curl
 
 COPY . .
 
-RUN go build -o backend main.go 
+RUN go build -o backend .
 
 EXPOSE 8080
 
