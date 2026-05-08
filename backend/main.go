@@ -40,6 +40,9 @@ func main() {
 	th := &handler.TouristSpotHandler{DB: db}
 	http.HandleFunc("/tourist_spots", th.GetAll)
 
+	ah := &handler.AuthHandler{DB: db}
+	http.HandleFunc("/auth/register", ah.Register)
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("ListenAndServe: %v", err)
 	}
