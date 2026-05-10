@@ -41,7 +41,6 @@
         "gopls": {
           "ui.semanticTokens": true
         },
-        "typescript.tsdk": "node_modules/typescript/lib",
         "eslint.validate": ["javascript", "typescript", "typescriptreact"],
         "terminal.integrated.defaultProfile.linux": "bash"
       }
