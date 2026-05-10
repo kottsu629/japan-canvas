@@ -1,57 +1,35 @@
 {
   "name": "Go + Node.js Dev",
-
-  // ベースイメージは Go 公式の devcontainer イメージを使用
-  // Node.js は Features で追加するので Dockerfile 不要
   "image": "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm",
-
-  // Dev Container Features: ツールをレイヤーで追加
   "features": {
-    // Node.js (LTS) を追加
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     },
-    // GitHub CLI（任意）
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-
-  // コンテナ起動後に依存パッケージをインストール
   "postCreateCommand": "cd backend && go mod tidy && gofmt -w . && cd .. && npm install",
-
-  // ポートフォワード設定（Next.js: 3000, Go API: 8080）
   "forwardPorts": [3000, 8080],
   "portsAttributes": {
     "3000": { "label": "Next.js", "onAutoForward": "notify" },
     "8080": { "label": "Go API", "onAutoForward": "notify" }
   },
-
-  // VS Code 拡張機能（コンテナ内にインストールされる）
   "customizations": {
     "vscode": {
       "extensions": [
-        // --- Go ---
-        "golang.go",                        // Go 公式
-        "premparihar.gotestexplorer",       // テストエクスプローラー
-
-        // --- JavaScript / TypeScript / Next.js ---
-        "dbaeumer.vscode-eslint",           // ESLint
-        "esbenp.prettier-vscode",           // Prettier
-        "bradlc.vscode-tailwindcss",        // Tailwind CSS
-        "ms-vscode.vscode-typescript-next", // TypeScript (最新)
-
-        // --- 汎用 DX ---
-        "usernamehw.errorlens",             // エラーをインライン表示
-        "eamodio.gitlens",                  // Git 強化
-        "streetsidesoftware.code-spell-checker", // スペルチェック
-        "ms-azuretools.vscode-docker"       // Docker ファイル補完
+        "golang.go",
+        "premparihar.gotestexplorer",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "usernamehw.errorlens",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker",
+        "ms-azuretools.vscode-docker"
       ],
-
-      // エディタ設定（コンテナ内のみ有効）
       "settings": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-
-        // Go は gopls + goimports
         "[go]": {
           "editor.defaultFormatter": "golang.go"
         },
@@ -60,17 +38,11 @@
         "gopls": {
           "ui.semanticTokens": true
         },
-
-        // TypeScript / Next.js
         "typescript.tsdk": "node_modules/typescript/lib",
         "eslint.validate": ["javascript", "typescript", "typescriptreact"],
-
-        // ターミナル
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
   },
-
-  // コンテナのユーザー（root を避けてセキュリティ向上）
   "remoteUser": "vscode"
 }
