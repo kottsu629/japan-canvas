@@ -1,13 +1,13 @@
 {
   "name": "Go + Node.js Dev",
-  "image": "mcr.microsoft.com/devcontainers/go:1-1.23-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/go:1-1.24-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  "postCreateCommand": "cd backend && go mod tidy && gofmt -w . && cd .. && npm install",
+  "postCreateCommand": "cd backend && go mod download && gofmt -w . && cd .. && npm install",
   "forwardPorts": [3000, 8080],
   "portsAttributes": {
     "3000": { "label": "Next.js", "onAutoForward": "notify" },

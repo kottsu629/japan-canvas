@@ -1,9 +1,9 @@
 package handler
 
-import(
+import (
 	"database/sql"
 	"encoding/json"
-	"net/http"		
+	"net/http"
 )
 
 type TouristSpot struct {
@@ -60,4 +60,3 @@ func (h *TouristSpotHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-	
