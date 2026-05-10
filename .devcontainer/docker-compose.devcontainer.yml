@@ -1,0 +1,35 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/go:1-1.24-bookworm
+    volumes:
+      - ..:/workspaces/japan-canvas:cached
+    command: sleep infinity
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: app_user
+      DB_PASSWORD: devapppass
+      DB_NAME: japan_canvas
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: devrootpass
+      MYSQL_DATABASE: japan_canvas
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: devapppass
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uapp_user -pdevapppass --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../db/init.sql:/docker-entrypoint-initdb.d/01_init.sql
+      - ../db/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
+
+volumes:
+  db_data:
