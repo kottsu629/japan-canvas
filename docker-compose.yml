@@ -1,7 +1,6 @@
 services:
   db:
-    image: mysql:8.0
-    platform: linux/x86_64
+    image: mysql:8.4
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
@@ -38,5 +37,16 @@ services:
       DB_USER: ${MYSQL_USER:-app_user}
       DB_PASSWORD: ${MYSQL_PASSWORD:?MYSQL_PASSWORD is required}
       DB_NAME: ${MYSQL_DATABASE:-japan_canvas}
+
+  frontend:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8080}
+
 volumes:
   db_data:
