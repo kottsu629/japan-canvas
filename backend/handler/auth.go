@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -63,20 +64,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	// 1. POSTチェック
+	jwtSecret := os.Getenv("JWT_SECRET")
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-
-	// 2. requestのJSONをLoginRequestに変換
 	var req LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
-	}
 
-	// 3. DBからユーザーを取得
+	}
 	var id int
 	var passwordHash string
 	err := h.DB.QueryRow(
@@ -91,21 +90,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-
-	// 4. パスワードを比較
 	if err := bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(req.Password)); err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
-
-	// 5. ログイン成功（ここではセッション管理などは省略）
-	claims := jwt.MapClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": id,
 		"exp":     time.Now().Add(24 * time.Hour).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte("秘密鍵"))
+	})
+	tokenString, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
+		log.Println("JWT error:", err)
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -113,5 +108,4 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"token": tokenString,
 	})
-
 }

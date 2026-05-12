@@ -42,6 +42,7 @@ func main() {
 
 	ah := &handler.AuthHandler{DB: db}
 	http.HandleFunc("/auth/register", ah.Register)
+	http.HandleFunc("/auth/login", ah.Login)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("ListenAndServe: %v", err)
