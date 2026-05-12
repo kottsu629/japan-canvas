@@ -24,6 +24,6 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-
+		next(w, r)
 	}
 }
