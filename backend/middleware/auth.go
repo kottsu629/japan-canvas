@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"strings"
@@ -10,7 +11,6 @@ import (
 
 func Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// ここに処理を書く
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -24,6 +24,13 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		next(w, r)
+
+		// JWTからuser_idを取り出す
+		claims := token.Claims.(jwt.MapClaims)
+		userID := int(claims["user_id"].(float64))
+
+		// contextにセットして次へ
+		ctx := context.WithValue(r.Context(), "user_id", userID)
+		next(w, r.WithContext(ctx))
 	}
 }

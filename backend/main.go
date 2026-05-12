@@ -2,6 +2,7 @@ package main
 
 import (
 	"backend/handler"
+	"backend/middleware"
 	"database/sql"
 	"fmt"
 	"log"
@@ -43,6 +44,9 @@ func main() {
 	ah := &handler.AuthHandler{DB: db}
 	http.HandleFunc("/auth/register", ah.Register)
 	http.HandleFunc("/auth/login", ah.Login)
+
+	vh := &handler.VisitedHandler{DB: db}
+	http.HandleFunc("/visits", middleware.Auth(vh.Handle))
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("ListenAndServe: %v", err)
