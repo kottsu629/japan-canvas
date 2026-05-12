@@ -22,8 +22,10 @@ func (h *VisitedHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	userID := r.Context().Value("user_id").(int)
 
-	rows, err := h.DB.Query("SELECT id, user_id, prefecture_id, visited_at, created_at FROM visits ORDER BY id")
+	rows, err := h.DB.Query("SELECT id, user_id, prefecture_id, visited_at, created_at FROM visits WHERE user_id = ? ORDER BY id", userID)
+
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
