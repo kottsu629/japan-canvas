@@ -12,6 +12,19 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next(w, r)
+	}
+}
+
 func main() {
 	user := os.Getenv("DB_USER")
 	pass := os.Getenv("DB_PASSWORD")
@@ -36,17 +49,17 @@ func main() {
 	log.Println("Server starting on :8080...")
 
 	ph := &handler.PrefectureHandler{DB: db}
-	http.HandleFunc("/prefectures", ph.GetAll)
+	http.HandleFunc("/prefectures", corsMiddleware(ph.GetAll))
 
 	th := &handler.TouristSpotHandler{DB: db}
-	http.HandleFunc("/tourist_spots", th.GetAll)
+	http.HandleFunc("/tourist_spots", corsMiddleware(th.GetAll))
 
 	ah := &handler.AuthHandler{DB: db}
-	http.HandleFunc("/auth/register", ah.Register)
-	http.HandleFunc("/auth/login", ah.Login)
+	http.HandleFunc("/auth/register", corsMiddleware(ah.Register))
+	http.HandleFunc("/auth/login", corsMiddleware(ah.Login))
 
 	vh := &handler.VisitedHandler{DB: db}
-	http.HandleFunc("/visits", middleware.Auth(vh.Handle))
+	http.HandleFunc("/visits", corsMiddleware(middleware.Auth(vh.Handle)))
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalf("ListenAndServe: %v", err)
