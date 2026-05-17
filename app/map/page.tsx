@@ -22,7 +22,23 @@ export default function MapPage() {
 }
 
 function JapanMap() {
-  const [paths, setPaths] = useState<string[]>([]);
+  const [features, setFeatures] = useState<GeoJSON.Feature[]>([]);
+  const [pathGenerator, setPathGenerator] = useState<ReturnType<
+    typeof geoPath
+  > | null>(null);
+  const [visitedIds, setVisitedIds] = useState<number[]>([]);
+  const handleClick = async (prefectureId: number) => {
+    const token = localStorage.getItem("token");
+    await fetch("http://localhost:8080/visits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ prefecture_id: prefectureId }),
+    });
+    setVisitedIds((prev) => [...prev, prefectureId]);
+  };
 
   useEffect(() => {
     fetch("/japan.json")
@@ -33,16 +49,36 @@ function JapanMap() {
           topo.objects.japan,
         ) as unknown as GeoJSON.FeatureCollection;
         const projection = geoMercator().fitSize([600, 700], geo);
-        const pathGenerator = geoPath().projection(projection);
-        const d = geo.features.map((f) => pathGenerator(f) ?? "");
-        setPaths(d);
+        const gen = geoPath().projection(projection);
+        setPathGenerator(() => gen);
+        setFeatures(geo.features);
+      });
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:8080/visits", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setVisitedIds(
+          data.map((v: { prefecture_id: number }) => v.prefecture_id),
+        );
       });
   }, []);
 
   return (
     <svg width={600} height={700}>
-      {paths.map((d, i) => (
-        <path key={i} d={d} fill="lightblue" stroke="white" strokeWidth={0.5} />
+      {features.map((f, i) => (
+        <path
+          key={i}
+          d={pathGenerator?.(f) ?? ""}
+          fill={visitedIds.includes(f.properties?.id) ? "green" : "lightblue"}
+          stroke="white"
+          strokeWidth={0.5}
+          onClick={() => handleClick(f.properties?.id)}
+        />
       ))}
     </svg>
   );

@@ -32,7 +32,7 @@ func (h *VisitedHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var visits []Visit
+	visits := []Visit{}
 	for rows.Next() {
 		var v Visit
 		if err := rows.Scan(&v.ID, &v.UserID, &v.PrefectureID, &v.VisitedAt, &v.CreatedAt); err != nil {
@@ -68,9 +68,10 @@ func (h *VisitedHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, err := h.DB.Exec(
-		"INSERT INTO visits (user_id, prefecture_id, visited_at) VALUES (?, ?, ?)",
-		userID, req.PrefectureID, req.VisitedAt,
+		"INSERT INTO visits (user_id, prefecture_id, visited_at) VALUES (?, ?, NOW())",
+		userID, req.PrefectureID,
 	)
+
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
