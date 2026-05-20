@@ -79,12 +79,34 @@ func (h *VisitedHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+func (h *VisitedHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("user_id").(int)
+	var req struct {
+		PrefectureID int `json:"prefecture_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	_, err := h.DB.Exec(
+		"DELETE FROM visits WHERE user_id = ? AND prefecture_id = ?",
+		userID, req.PrefectureID,
+	)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (h *VisitedHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.GetAll(w, r)
 	case http.MethodPost:
 		h.Create(w, r)
+	case http.MethodDelete:
+		h.Delete(w, r)
 	default:
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 	}

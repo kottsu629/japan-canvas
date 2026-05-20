@@ -29,15 +29,22 @@ function JapanMap() {
   const [visitedIds, setVisitedIds] = useState<number[]>([]);
   const handleClick = async (prefectureId: number) => {
     const token = localStorage.getItem("token");
+    const isVisited = visitedIds.includes(prefectureId);
+
     await fetch("http://localhost:8080/visits", {
-      method: "POST",
+      method: isVisited ? "DELETE" : "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ prefecture_id: prefectureId }),
     });
-    setVisitedIds((prev) => [...prev, prefectureId]);
+
+    if (isVisited) {
+      setVisitedIds((prev) => prev.filter((id) => id !== prefectureId));
+    } else {
+      setVisitedIds((prev) => [...prev, prefectureId]);
+    }
   };
 
   useEffect(() => {
