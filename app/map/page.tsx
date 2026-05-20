@@ -27,6 +27,9 @@ function JapanMap() {
     typeof geoPath
   > | null>(null);
   const [visitedIds, setVisitedIds] = useState<number[]>([]);
+  const total = 47;
+  const visited = visitedIds.length;
+  const percentage = Math.round((visited / total) * 100);
   const handleClick = async (prefectureId: number) => {
     const token = localStorage.getItem("token");
     const isVisited = visitedIds.includes(prefectureId);
@@ -76,17 +79,22 @@ function JapanMap() {
   }, []);
 
   return (
-    <svg width={600} height={700}>
-      {features.map((f, i) => (
-        <path
-          key={i}
-          d={pathGenerator?.(f) ?? ""}
-          fill={visitedIds.includes(f.properties?.id) ? "green" : "lightblue"}
-          stroke="white"
-          strokeWidth={0.5}
-          onClick={() => handleClick(f.properties?.id)}
-        />
-      ))}
-    </svg>
+    <div>
+      <p>
+        {visited} / {total} 都道府県 ({percentage}%)
+      </p>
+      <svg width={600} height={700}>
+        {features.map((f, i) => (
+          <path
+            key={i}
+            d={pathGenerator?.(f) ?? ""}
+            fill={visitedIds.includes(f.properties?.id) ? "green" : "lightblue"}
+            stroke="white"
+            strokeWidth={0.5}
+            onClick={() => handleClick(f.properties?.id)}
+          />
+        ))}
+      </svg>
+    </div>
   );
 }
