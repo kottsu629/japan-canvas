@@ -10,13 +10,20 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const handleSubmit = async () => {
-    const res = await fetch("http://localhost:8080/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    if (res.ok) {
-      router.push("/login");
+    try {
+      const res = await fetch("http://localhost:8080/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        const data = await res.json();
+        alert(data.message ?? "登録に失敗しました");
+      }
+    } catch {
+      alert("サーバーに接続できませんでした");
     }
   };
 

@@ -8,15 +8,22 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleSubmit = async () => {
-    const res = await fetch("http://localhost:8080/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    console.log(data);
-    localStorage.setItem("token", data.token);
-    router.push("/map");
+    try {
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        router.push("/map");
+      } else {
+        alert(data.message ?? "ログインに失敗しました");
+      }
+    } catch {
+      alert("サーバーに接続できませんでした");
+    }
   };
 
   return (
