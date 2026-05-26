@@ -29,7 +29,7 @@ create table visits (
         foreign key (prefecture_id) references prefectures(id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
-create table tourist_spots (
+create table cities (
     id int primary key auto_increment,
     prefecture_id int not null,
     name varchar(255) not null,
@@ -38,6 +38,6 @@ create table tourist_spots (
     affiliate_url varchar(255),
     created_at timestamp default current_timestamp,
     key idx_prefecture_id (prefecture_id),
-    constraint fk_tourist_spots_prefectures
+    constraint fk_cities_prefectures
         foreign key (prefecture_id) references prefectures(id)
 )Engine = InnoDB DEFAULT CHARSET = utf8mb4;

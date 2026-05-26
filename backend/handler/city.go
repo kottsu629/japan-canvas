@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type TouristSpot struct {
+type City struct {
 	ID           int     `json:"id"`
 	PrefectureID int     `json:"prefecture_id"`
 	Name         string  `json:"name"`
@@ -16,38 +16,38 @@ type TouristSpot struct {
 	CreatedAt    string  `json:"created_at"`
 }
 
-type TouristSpotHandler struct {
+type CityHandler struct {
 	DB *sql.DB
 }
 
-func (h *TouristSpotHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+func (h *CityHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	rows, err := h.DB.Query("SELECT id, prefecture_id, name, `rank`, image_url, affiliate_url, created_at FROM tourist_spots ORDER BY id")
+	rows, err := h.DB.Query("SELECT id, prefecture_id, name, `rank`, image_url, affiliate_url, created_at FROM cities ORDER BY prefecture_id, `rank`")
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var touristSpots []TouristSpot
+	var cities []City
 	for rows.Next() {
-		var ts TouristSpot
+		var c City
 		var imgURL, affURL sql.NullString
-		if err := rows.Scan(&ts.ID, &ts.PrefectureID, &ts.Name, &ts.Rank, &imgURL, &affURL, &ts.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.PrefectureID, &c.Name, &c.Rank, &imgURL, &affURL, &c.CreatedAt); err != nil {
 			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 		if imgURL.Valid {
-			ts.ImageURL = &imgURL.String
+			c.ImageURL = &imgURL.String
 		}
 		if affURL.Valid {
-			ts.AffiliateURL = &affURL.String
+			c.AffiliateURL = &affURL.String
 		}
-		touristSpots = append(touristSpots, ts)
+		cities = append(cities, c)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -55,8 +55,5 @@ func (h *TouristSpotHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(touristSpots); err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
+	json.NewEncoder(w).Encode(cities)
 }

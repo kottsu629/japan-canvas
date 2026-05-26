@@ -52,8 +52,8 @@ func main() {
 	ph := &handler.PrefectureHandler{DB: db}
 	http.HandleFunc("/prefectures", corsMiddleware(ph.GetAll))
 
-	th := &handler.TouristSpotHandler{DB: db}
-	http.HandleFunc("/tourist_spots", corsMiddleware(th.GetAll))
+	ch := &handler.CityHandler{DB: db}
+	http.HandleFunc("/cities", corsMiddleware(ch.GetAll))
 
 	ah := &handler.AuthHandler{DB: db}
 	http.HandleFunc("/auth/register", corsMiddleware(ah.Register))
