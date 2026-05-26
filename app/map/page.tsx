@@ -8,10 +8,11 @@ import * as topojson from "topojson-client";
 export default function MapPage() {
   const router = useRouter();
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-    }
+    fetch("http://localhost:8080/visits", { credentials: "include" }).then(
+      (res) => {
+        if (res.status === 401) router.push("/login");
+      },
+    );
   }, [router]);
   return (
     <div>
@@ -31,15 +32,12 @@ function JapanMap() {
   const visited = visitedIds.length;
   const percentage = Math.round((visited / total) * 100);
   const handleClick = async (prefectureId: number) => {
-    const token = localStorage.getItem("token");
     const isVisited = visitedIds.includes(prefectureId);
 
     await fetch("http://localhost:8080/visits", {
       method: isVisited ? "DELETE" : "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ prefecture_id: prefectureId }),
     });
 
@@ -66,10 +64,7 @@ function JapanMap() {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch("http://localhost:8080/visits", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch("http://localhost:8080/visits", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         setVisitedIds(
