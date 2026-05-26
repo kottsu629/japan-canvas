@@ -26,7 +26,14 @@ func (h *CityHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := h.DB.Query("SELECT id, prefecture_id, name, `rank`, image_url, affiliate_url, created_at FROM cities ORDER BY prefecture_id, `rank`")
+	prefID := r.URL.Query().Get("prefecture_id")
+	var rows *sql.Rows
+	var err error
+	if prefID != "" {
+		rows, err = h.DB.Query("SELECT id, prefecture_id, name, `rank`, image_url, affiliate_url, created_at FROM cities WHERE prefecture_id = ? ORDER BY `rank`", prefID)
+	} else {
+		rows, err = h.DB.Query("SELECT id, prefecture_id, name, `rank`, image_url, affiliate_url, created_at FROM cities ORDER BY prefecture_id, `rank`")
+	}
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
