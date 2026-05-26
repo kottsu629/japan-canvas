@@ -23,12 +23,7 @@ export default function MapPage() {
       },
     );
   }, [router]);
-  return (
-    <div>
-      <h1>地図</h1>
-      <JapanMap />
-    </div>
-  );
+  return <JapanMap />;
 }
 
 function JapanMap() {
@@ -89,44 +84,68 @@ function JapanMap() {
   }, []);
 
   return (
-    <div style={{ display: "flex", gap: 24 }}>
-      <div>
-        <p>
-          {visited} / {total} 都道府県 ({percentage}%)
-        </p>
-        <svg width={600} height={700}>
-          {features.map((f, i) => (
-            <path
-              key={i}
-              d={pathGenerator?.(f) ?? ""}
-              fill={
-                visitedIds.includes(f.properties?.id)
-                  ? "green"
-                  : selectedId === f.properties?.id
-                    ? "#f0a500"
-                    : "lightblue"
-              }
-              stroke="white"
-              strokeWidth={0.5}
-              style={{ cursor: "pointer" }}
-              onClick={() =>
-                handleMapClick(
-                  f.properties?.id,
-                  f.properties?.nam_ja ?? "",
-                )
-              }
+    <div className="h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
+        <h1 className="text-xl font-bold tracking-widest">JAPAN CANVAS</h1>
+        <div className="text-sm text-gray-500">
+          <span className="font-bold text-gray-900 text-base">{visited}</span>
+          <span> / {total} 都道府県 </span>
+          <span className="text-blue-600 font-semibold">{percentage}%</span>
+        </div>
+      </header>
+
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        <main className="flex-1 min-h-0 min-w-0 flex items-center justify-center p-2 md:p-4">
+          <svg viewBox="0 0 600 700" className="max-h-full w-auto">
+            {features.map((f, i) => (
+              <path
+                key={i}
+                d={pathGenerator?.(f) ?? ""}
+                fill={
+                  visitedIds.includes(f.properties?.id)
+                    ? "#16a34a"
+                    : selectedId === f.properties?.id
+                      ? "#f59e0b"
+                      : "#bfdbfe"
+                }
+                stroke="white"
+                strokeWidth={0.5}
+                className="cursor-pointer hover:opacity-75 transition-opacity"
+                onClick={() =>
+                  handleMapClick(
+                    f.properties?.id,
+                    f.properties?.nam_ja ?? "",
+                  )
+                }
+              />
+            ))}
+          </svg>
+        </main>
+
+        {selectedId !== null && (
+          <aside className="hidden md:block w-80 border-l bg-white overflow-y-auto shrink-0">
+            <SidePanel
+              prefectureId={selectedId}
+              prefectureName={selectedName}
+              isVisited={visitedIds.includes(selectedId)}
+              onToggleVisit={handleToggleVisit}
+              onClose={() => setSelectedId(null)}
             />
-          ))}
-        </svg>
+          </aside>
+        )}
       </div>
+
       {selectedId !== null && (
-        <SidePanel
-          prefectureId={selectedId}
-          prefectureName={selectedName}
-          isVisited={visitedIds.includes(selectedId)}
-          onToggleVisit={handleToggleVisit}
-          onClose={() => setSelectedId(null)}
-        />
+        <div className="md:hidden fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-2xl max-h-[70vh] overflow-y-auto z-10">
+          <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mt-3" />
+          <SidePanel
+            prefectureId={selectedId}
+            prefectureName={selectedName}
+            isVisited={visitedIds.includes(selectedId)}
+            onToggleVisit={handleToggleVisit}
+            onClose={() => setSelectedId(null)}
+          />
+        </div>
       )}
     </div>
   );
@@ -156,67 +175,67 @@ function SidePanel({
   }, [prefectureId]);
 
   return (
-    <div
-      style={{
-        width: 280,
-        borderLeft: "1px solid #ccc",
-        paddingLeft: 16,
-        overflowY: "auto",
-        maxHeight: 700,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h2>{prefectureName}</h2>
-        <button onClick={onClose}>✕</button>
+    <div className="p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold">{prefectureName}</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 text-lg leading-none p-1"
+        >
+          ✕
+        </button>
       </div>
+
       <button
         onClick={() => onToggleVisit(prefectureId)}
-        style={{
-          backgroundColor: isVisited ? "#aaa" : "green",
-          color: "white",
-          padding: "8px 16px",
-          border: "none",
-          borderRadius: 4,
-          cursor: "pointer",
-          marginBottom: 16,
-          width: "100%",
-        }}
+        className={`w-full py-2.5 rounded-lg font-semibold text-white mb-6 transition-colors ${
+          isVisited
+            ? "bg-gray-400 hover:bg-gray-500"
+            : "bg-green-600 hover:bg-green-700"
+        }`}
       >
-        {isVisited ? "行った！（解除）" : "行った！"}
+        {isVisited ? "✓ 行った！（解除）" : "行った！"}
       </button>
-      <h3>おすすめの市</h3>
+
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        おすすめの市
+      </p>
+
       {cities.length === 0 ? (
-        <p>データなし</p>
+        <p className="text-gray-400 text-sm">データなし</p>
       ) : (
-        cities.map((city) => (
-          <div key={city.id} style={{ marginBottom: 16 }}>
-            <p style={{ fontWeight: "bold" }}>
-              {city.rank}. {city.name}
-            </p>
-            {city.image_url && (
-              <img
-                src={city.image_url}
-                alt={city.name}
-                style={{ width: "100%", borderRadius: 4 }}
-              />
-            )}
-            {city.affiliate_url && (
-              <a
-                href={city.affiliate_url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                宿泊を探す →
-              </a>
-            )}
-          </div>
-        ))
+        <div className="space-y-3">
+          {cities.map((city) => (
+            <div
+              key={city.id}
+              className="rounded-xl overflow-hidden border border-gray-100 shadow-sm"
+            >
+              {city.image_url && (
+                <img
+                  src={city.image_url}
+                  alt={city.name}
+                  className="w-full h-32 object-cover"
+                />
+              )}
+              <div className="p-3">
+                <p className="font-semibold text-sm">
+                  <span className="text-gray-400 mr-1">{city.rank}.</span>
+                  {city.name}
+                </p>
+                {city.affiliate_url && (
+                  <a
+                    href={city.affiliate_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 text-xs mt-1 inline-block hover:underline"
+                  >
+                    宿泊を探す →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
